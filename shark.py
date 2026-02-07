@@ -130,6 +130,26 @@ def get_pace_label(ppm):
     if ppm >= 3.8: return "LOW"
     return "VERY LOW"
 
+# ── Kalshi NBA deep link builder ─────────────────────────────────────
+# Pattern: https://kalshi.com/markets/kxnbagame/professional-basketball-game/kxnbagame-26feb07houokc
+
+KALSHI_TEAM_MAP = {
+    "ATL": "atl", "BOS": "bos", "BKN": "bkn", "CHA": "cha", "CHI": "chi",
+    "CLE": "cle", "DAL": "dal", "DEN": "den", "DET": "det", "GSW": "gsw",
+    "HOU": "hou", "IND": "ind", "LAC": "lac", "LAL": "lal", "MEM": "mem",
+    "MIA": "mia", "MIL": "mil", "MIN": "min", "NOP": "nop", "NYK": "nyk",
+    "OKC": "okc", "ORL": "orl", "PHI": "phi", "PHX": "phx", "POR": "por",
+    "SAC": "sac", "SAS": "sas", "TOR": "tor", "UTA": "uta", "WAS": "was",
+}
+
+def get_kalshi_nba_link(away_abbr, home_abbr):
+    now = datetime.now(timezone.utc)
+    date_str = now.strftime("%y") + now.strftime("%b").lower() + now.strftime("%d")
+    away_k = KALSHI_TEAM_MAP.get(away_abbr.upper(), away_abbr.lower())
+    home_k = KALSHI_TEAM_MAP.get(home_abbr.upper(), home_abbr.lower())
+    ticker = "kxnbagame-" + date_str + away_k + home_k
+    return "https://kalshi.com/markets/kxnbagame/professional-basketball-game/" + ticker
+
 
 # ══════════════════════════════════════════════════════════════════════
 # ESPN NBA SCOREBOARD FETCH
@@ -315,6 +335,8 @@ if live_games:
                 if abs(diff) >= 5:
                     direction = "OVER" if diff > 0 else "UNDER"
                     st.markdown("**Totals Edge:** Proj " + str(proj) + " vs Line " + str(g["over_under"]) + " -> **" + direction + " (" + "{:+.1f}".format(diff) + ")**")
+        kalshi_link = get_kalshi_nba_link(g["away_abbr"], g["home_abbr"])
+        st.markdown("[Trade on Kalshi](" + kalshi_link + ")")
         st.markdown("---")
     st.divider()
 
@@ -440,6 +462,8 @@ if live_games:
                         " (" + "{:+.1f}".format(diff) + ")**")
             except (ValueError, TypeError):
                 pass
+        kalshi_link = get_kalshi_nba_link(g["away_abbr"], g["home_abbr"])
+        st.markdown("[Trade on Kalshi](" + kalshi_link + ")")
     st.divider()
 
 
