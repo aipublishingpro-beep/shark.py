@@ -328,7 +328,7 @@ if live_games:
     cs_games = [str(g["away_abbr"]) + " @ " + str(g["home_abbr"]) for g in live_games]
     cs_sel = st.selectbox("Game", ["ALL GAMES"] + cs_games, key="cs_game")
     cs_c1, cs_c2 = st.columns(2)
-    cs_min = cs_c1.slider("Min minutes elapsed", 0, 58, 42, key="cs_min")
+    cs_min = cs_c1.slider("Min minutes elapsed", 0, 48, 0, key="cs_min")
     cs_side = cs_c2.selectbox("Side", ["Both", "Over", "Under"], key="cs_side")
 
     found_any = False
