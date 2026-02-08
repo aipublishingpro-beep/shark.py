@@ -8,14 +8,20 @@ st.set_page_config(page_title="BigSnapshot NBA Cushion Scanner", page_icon="🏀
 
 import requests, json, time, hashlib, datetime as dt
 from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 from streamlit_autorefresh import st_autorefresh
+
+# ══════════════════════════════════════════════════════════════════════
+# TIMEZONE — Always use Eastern for NBA game dates
+# ══════════════════════════════════════════════════════════════════════
+ET = ZoneInfo("America/New_York")
+
+def now_et():
+    return datetime.now(ET)
 
 # ══════════════════════════════════════════════════════════════════════
 # OWNER MODE — password gate via URL param or input
 # ══════════════════════════════════════════════════════════════════════
-# Usage: https://yourapp.streamlit.app/?key=SHARK2026
-# Or enter password in the input box on load.
-
 OWNER_KEY = "SHARK2026"
 
 def check_auth():
@@ -44,7 +50,7 @@ st_autorefresh(interval=30_000, limit=10000, key="nba_refresh")
 # CONFIG
 # ══════════════════════════════════════════════════════════════════════
 
-VERSION = "1.0"
+VERSION = "1.1"
 GAME_MINUTES = 48
 QUARTER_MINUTES = 12
 OT_MINUTES = 5
@@ -131,7 +137,6 @@ def get_pace_label(ppm):
     return "VERY LOW"
 
 # ── Kalshi NBA deep link builder ─────────────────────────────────────
-# Pattern: https://kalshi.com/markets/kxnbagame/professional-basketball-game/kxnbagame-26feb07houokc
 
 KALSHI_TEAM_MAP = {
     "ATL": "atl", "BOS": "bos", "BKN": "bkn", "CHA": "cha", "CHI": "chi",
@@ -143,7 +148,7 @@ KALSHI_TEAM_MAP = {
 }
 
 def get_kalshi_nba_link(away_abbr, home_abbr):
-    now = datetime.now(timezone.utc)
+    now = now_et()
     date_str = now.strftime("%y") + now.strftime("%b").lower() + now.strftime("%d")
     away_k = KALSHI_TEAM_MAP.get(away_abbr.upper(), away_abbr.lower())
     home_k = KALSHI_TEAM_MAP.get(home_abbr.upper(), home_abbr.lower())
@@ -152,12 +157,12 @@ def get_kalshi_nba_link(away_abbr, home_abbr):
 
 
 # ══════════════════════════════════════════════════════════════════════
-# ESPN NBA SCOREBOARD FETCH
+# ESPN NBA SCOREBOARD FETCH — USES EASTERN TIME FOR DATE
 # ══════════════════════════════════════════════════════════════════════
 
 def fetch_nba_games():
     games = []
-    today = datetime.now(timezone.utc).strftime("%Y%m%d")
+    today = now_et().strftime("%Y%m%d")
     url = ("https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard"
            "?dates=" + today + "&limit=50")
     try:
@@ -280,7 +285,7 @@ def render_scoreboard(g):
 # ══════════════════════════════════════════════════════════════════════
 
 st.markdown("## BIGSNAPSHOT NBA CUSHION SCANNER")
-st.caption("v" + VERSION + " | " + datetime.now(timezone.utc).strftime("%A %b %d, %Y | %H:%M UTC") + " | NBA | Cushion + Pace")
+st.caption("v" + VERSION + " | " + now_et().strftime("%A %b %d, %Y | %I:%M %p ET") + " | NBA | Cushion + Pace")
 
 all_games = fetch_nba_games()
 
